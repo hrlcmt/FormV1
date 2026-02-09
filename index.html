@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="description" content="ระบบใบสมัครงานและแบบทดสอบออนไลน์ - บริษัท แอล ซี เอ็ม ที" />
+  <title>ใบสมัครและแบบทดสอบออนไลน์ | LCMT</title>
+  
+  <!-- Preload & Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Prompt', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Thai', sans-serif;
+    }
+    
+    /* Page Transitions */
+    .page {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    .page.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Custom Scrollbar */
+    .policy-box::-webkit-scrollbar,
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .policy-box::-webkit-scrollbar-track,
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    
+    .policy-box::-webkit-scrollbar-thumb,
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    
+    .policy-box::-webkit-scrollbar-thumb:hover,
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    .spinner-lg {
+      width: 40px;
+      height: 40px;
+      border-width: 4px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Input validation styles */
+    input:invalid:not(:placeholder-shown):not(:focus),
+    textarea:invalid:not(:placeholder-shown):not(:focus),
+    select:invalid:not(:focus) {
+      border-color: #f87171 !important;
+    }
+    
+    input:valid:not(:placeholder-shown),
+    textarea:valid:not(:placeholder-shown),
+    select:valid {
+      border-color: #34d399;
+    }
+    
+    /* Toast notification */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+    }
+    
+    .toast {
+      padding: 16px 24px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .toast.show {
+      transform: translateX(0);
+    }
+    
+    .toast.success { background-color: #10b981; }
+    .toast.error { background-color: #ef4444; }
+    .toast.warning { background-color: #f59e0b; }
+    .toast.info { background-color: #3b82f6; }
+    
+    .toast-icon {
+      font-size: 1.25rem;
+    }
+    
+    /* Progress Bar */
+    .progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #e2e8f0;
+      z-index: 999;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #06b6d4);
+      transition: width 0.3s ease;
+      border-radius: 0 2px 2px 0;
+    }
+    
+    /* Step Indicator */
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 2rem;
+    }
+    
+    .step-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      transition: all 0.3s ease;
+    }
+    
+    .step-dot.active {
+      background: #3b82f6;
+      transform: scale(1.2);
+    }
+    
+    .step-dot.completed {
+      background: #10b981;
+    }
+    
+    /* Button hover effects */
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover:not(:disabled) {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+    }
+    
+    /* Modal backdrop animation */
+    .modal-backdrop {
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    /* Offline indicator */
+    .offline-indicator {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f59e0b;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 500;
+      z-index: 1001;
+      display: none;
+    }
+    
+    .offline-indicator.show {
+      display: block;
+    }
+    
+    /* Focus visible for accessibility */
+    :focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+    
+    /* Reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 relative overflow-x-hidden">
+  <!-- Progress Bar -->
+  <div class="progress-container">
+    <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+  </div>
+  
+  <!-- Offline Indicator -->
+  <div id="offlineIndicator" class="offline-indicator">
+    ⚠️ ไม่มีการเชื่อมต่ออินเทอร์เน็ต
+  </div>
+  
+  <!-- Decorative background -->
+  <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 -top-40 -z-10 flex justify-center opacity-60">
+    <div class="h-72 w-[56rem] bg-gradient-to-tr from-blue-300 via-cyan-200 to-blue-100 blur-3xl rounded-full"></div>
+  </div>
+  <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10" style="background-image: radial-gradient(circle at 1px 1px, rgba(99,102,241,.15) 1px, transparent 0); background-size: 24px 24px;"></div>
+  
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+  
+  <main class="max-w-3xl mx-auto p-4 md:p-6 lg:p-10">
+    
+    <!-- ============================================================ -->
+    <!-- Page 1: Registration Form -->
+    <!-- ============================================================ -->
+    <div id="page-register" class="page active" data-step="1">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        
+        <!-- Header -->
+        <header class="mb-6 text-center">
+          <img 
+            src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" 
+            alt="โลโก้บริษัท LCMT" 
+            class="mx-auto mb-4 md:mb-6 w-full max-w-[420px] object-contain"
+            loading="eager"
+          />
+          <h1 class="text-2xl md:text-4xl font-extrabold text-blue-700 leading-tight">ใบสมัคร</h1>
+          <h2 class="text-xl md:text-3xl font-extrabold text-blue-700">และร่วมเข้าทำแบบทดสอบ</h2>
+          <p class="text-blue-500 mt-2">สำหรับ บริษัท แอล ซี เอ็ม ที</p>
+        </header>
+        
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+          <div class="step-dot active" title="กรอกข้อมูล"></div>
+          <div class="step-dot" title="ดูวิดีโอคำแนะนำ"></div>
+          <div class="step-dot" title="PI Test A"></div>
+          <div class="step-dot" title="PI Test B"></div>
+          <div class="step-dot" title="Logical Set 1"></div>
+          <div class="step-dot" title="Logical Set 2"></div>
+          <div class="step-dot" title="Logical Set 3"></div>
+          <div class="step-dot" title="English Test"></div>
+          <div class="step-dot" title="เสร็จสิ้น"></div>
+        </div>
+        
+        <!-- Registration Form -->
+        <form id="registerForm" class="space-y-6" novalidate>
+          
+          <!-- Section 1: ข้อมูลส่วนตัว -->
+          <fieldset class="space-y-4">
+            <legend class="text-xl font-bold text-blue-800 border-b border-blue-200 pb-2 flex items-center gap-2 w-full">
+              <span>👤</span> ข้อมูลส่วนตัว
+            </legend>
+            
+            <!-- ชื่อ-นามสกุล (ไทย) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="firstNameTH" class="block font-medium text-slate-700">
+                  ชื่อ (ภาษาไทย) <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  id="firstNameTH" 
+                  name="FirstNameTH" 
+                  type="text" 
+                  placeholder="ระบุชื่อภาษาไทย" 
+                  required 
+                  pattern="[\u0E00-\u0E7F\s]+"
+                  autocomplete="given-name"
+                  class="mt-1 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+                />
+                <p id="firstNameTHError" class="mt-1 text-sm text-rose-600 hidden">กรุณากรอกชื่อภาษาไทยเท่านั้น</p>
+              </div>
+              <div>
+                <label for="lastNameTH" class="block font-medium text-slate-700">
+                  นามสกุล (ภาษาไทย) <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  id="lastNameTH" 
+                  name="LastNameTH" 
+                  type="text" 
+                  placeholder="ระบุนามสกุลภาษาไทย" 
+                  required 
+                  pattern="[\u0E00-\u0E7F\s]+"
+                  autocomplete="family-name"
+                  class="mt-1 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+                />
+                <p id="lastNameTHError" class="mt-1 text-sm text-rose-600 hidden">กรุณากรอกนามสกุลภาษาไทยเท่านั้น</p>
+              </div>
+            </div>
+
+            <!-- ชื่อ-นามสกุล (อังกฤษ) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="firstName" class="block font-medium text-slate-700">
+                  ชื่อ (ภาษาอังกฤษ) <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  id="firstName" 
+                  name="FirstName" 
+                  type="text" 
+                  placeholder="e.g., Nattapong" 
+                  required 
+                  pattern="[A-Za-z]+(?:[\s\-'][A-Za-z]+)*"
+                  class="mt-1 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+                />
+                <p id="firstNameError" class="mt-1 text-sm text-rose-600 hidden">กรุณากรอกเป็นตัวอักษรภาษาอังกฤษเท่านั้น</p>
+              </div>
+              <div>
+                <label for="lastName" class="block font-medium text-slate-700">
+                  นามสกุล (ภาษาอังกฤษ) <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  id="lastName" 
+                  name="LastName" 
+                  type="text" 
+                  placeholder="e.g., Chaiyaphum" 
+                  required 
+                  pattern="[A-Za-z]+(?:[\s\-'][A-Za-z]+)*"
+                  class="mt-1 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+                />
+                <p id="lastNameError" class="mt-1 text-sm text-rose-600 hidden">กรุณากรอกเป็นตัวอักษรภาษาอังกฤษเท่านั้น</p>
+              </div>
+            </div>
+
+            <!-- อีเมล & เบอร์โทร -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="email" class="block font-medium text-slate-700">
+                  อีเมล <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  id="email" 
+                  name="Email" 
+                  type="email" 
+                  inputmode="email"
+                  placeholder="name@example.com" 
+                  required
+                  autocomplete="email"
+                  class="mt-1 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+                />
+                <p id="emailError" class="mt-1 text-sm text-rose-600 hidden">กรุณากรอกอีเมลที่ถูกต้อง</p>
+              </div>
+              <div>
+                <label for="phone" class="block font-medium text-slate-700">
+                  เบอร์โทรศัพท์ <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  id="phone" 
+                  name="Phone" 
+                  type="tel" 
+                  inputmode="numeric"
+                  placeholder="0812345678" 
+                  required 
+                  pattern="^0[0-9]{8,9}$" 
+                  maxlength="10"
+                  autocomplete="tel"
+                  class="mt-1 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+                />
+                <p id="phoneError" class="mt-1 text-sm text-rose-600 hidden">กรุณากรอกเบอร์โทรศัพท์ 10 หลัก (เช่น 0812345678)</p>
+              </div>
+            </div>
+
+            <!-- ตำแหน่ง -->
+            <div>
+              <label for="position" class="block font-medium text-slate-700">
+                ตำแหน่งที่สมัคร <span class="text-rose-500">*</span>
+              </label>
+              <input 
+                id="position" 
+                name="Position" 
+                type="text" 
+                placeholder="ระบุตำแหน่งที่ต้องการสมัคร" 
+                required 
+                minlength="2"
+                class="mt-1 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+              />
+              <p id="positionError" class="mt-1 text-sm text-rose-600 hidden">กรุณาระบุตำแหน่ง</p>
+            </div>
+          </fieldset>
+
+          <!-- Section 2: ข้อมูลทั่วไป -->
+          <fieldset class="space-y-4 pt-2">
+            <legend class="text-xl font-bold text-blue-800 border-b border-blue-200 pb-2 flex items-center gap-2 w-full">
+              <span>🎓</span> ข้อมูลทั่วไป
+            </legend>
+
+            <!-- สถานภาพทางทหาร -->
+            <div>
+              <label class="block font-medium text-slate-700 mb-2">
+                สถานภาพทางทหาร <span class="text-rose-500">*</span>
+              </label>
+              <div class="flex flex-col gap-2" role="radiogroup" aria-labelledby="military-label">
+                <label class="inline-flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                  <input type="radio" name="MilitaryStatus" value="Passed" class="form-radio text-blue-600 h-5 w-5" required />
+                  <span class="ml-3">ผ่านเกณฑ์ทหาร</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                  <input type="radio" name="MilitaryStatus" value="NotPassed" class="form-radio text-blue-600 h-5 w-5" />
+                  <span class="ml-3">ยังไม่ผ่านเกณฑ์ทหาร</span>
+                </label>
+                <div class="flex items-center gap-2 p-2">
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="radio" name="MilitaryStatus" value="Other" class="form-radio text-blue-600 h-5 w-5" id="militaryOtherRadio" />
+                    <span class="ml-3">อื่นๆ</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="militaryOtherText" 
+                    name="MilitaryStatusOther" 
+                    placeholder="โปรดระบุ" 
+                    class="flex-1 rounded-lg border border-blue-100 px-3 py-2 text-sm shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-400 transition-all" 
+                    disabled
+                    aria-label="ระบุสถานภาพทางทหารอื่นๆ"
+                  />
+                </div>
+              </div>
+              <p id="militaryError" class="mt-1 text-sm text-rose-600 hidden">กรุณาเลือกสถานภาพทางทหาร</p>
+            </div>
+
+            <!-- การศึกษา -->
+            <div>
+              <label for="educationLevel" class="block font-medium text-slate-700">
+                วุฒิการศึกษาล่าสุด <span class="text-rose-500">*</span>
+              </label>
+              <select 
+                id="educationLevel" 
+                name="EducationLevel" 
+                required 
+                class="mt-1 w-full rounded-xl border border-blue-100 px-4 py-3 bg-white shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all"
+              >
+                <option value="" disabled selected>— เลือก —</option>
+                <option value="มัธยมศึกษาตอนปลาย / ปวช.">มัธยมศึกษาตอนปลาย / ปวช.</option>
+                <option value="อนุปริญญา / ปวส.">อนุปริญญา / ปวส.</option>
+                <option value="ปริญญาตรี">ปริญญาตรี</option>
+                <option value="ปริญญาโท">ปริญญาโท</option>
+                <option value="ปริญญาเอก">ปริญญาเอก</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+              </select>
+              <p id="educationError" class="mt-1 text-sm text-rose-600 hidden">กรุณาเลือกวุฒิการศึกษา</p>
+            </div>
+
+            <!-- สารเสพติด -->
+            <div class="pt-2">
+              <label class="block font-medium text-slate-700 mb-2">
+                ท่านเคยใช้สารเสพติดหรือไม่? <span class="text-rose-500">*</span>
+              </label>
+              <div class="flex gap-6" role="radiogroup">
+                <label class="inline-flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                  <input type="radio" name="DrugHistory" value="Yes" class="form-radio text-rose-600 h-5 w-5" required />
+                  <span class="ml-3">เคย</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                  <input type="radio" name="DrugHistory" value="No" class="form-radio text-emerald-600 h-5 w-5" />
+                  <span class="ml-3">ไม่เคย</span>
+                </label>
+              </div>
+              <p id="drugError" class="mt-1 text-sm text-rose-600 hidden">กรุณาตอบคำถาม</p>
+            </div>
+          </fieldset>
+
+          <!-- Section 3: นโยบายและการยอมรับเงื่อนไข -->
+          <fieldset class="space-y-4 pt-2">
+            <legend class="text-xl font-bold text-rose-700 border-b border-rose-200 pb-2 flex items-center gap-2 w-full">
+              <span>📜</span> นโยบายและเงื่อนไขการรับสมัคร
+            </legend>
+            
+            <div class="policy-box bg-slate-50 border border-slate-200 rounded-xl p-5 text-sm text-slate-700 leading-relaxed max-h-80 overflow-y-auto">
+              <p class="font-bold text-black mb-2">นโยบายเขตปลอดสารเสพติด</p>
+              <p class="mb-4">บริษัทฯ มีนโยบายมุ่งเน้นความปลอดภัยและชีวอนามัยในการทำงาน จึงกำหนดให้ที่ทำงานเป็นเขตปลอดสารเสพติดและสารมึนเมาทุกชนิด รวมถึงแต่ไม่จำกัดเพียง ยาบ้า ยาไอซ์ กัญชา กัญชง และพืชกระท่อม</p>
+              <p class="mb-4">การจ้างงานตามสัญญานี้ เป็นการจ้างงานแบบมีเงื่อนไข (Conditional Offer) โดยท่านยินยอมให้บริษัทฯ ดำเนินการตรวจสุขภาพและตรวจหาสารเสพติดในร่างกายก่อนวันเริ่มงานจริง</p>
+              <p class="mb-4"><strong>หากผลการตรวจพบว่ามีสารเสพติดในร่างกาย:</strong> บริษัทฯ ขอสงวนสิทธิ์ในการยกเลิกการจ้างงานโดยทันที โดยไม่มีค่าใช้จ่ายใดๆ ทั้งสิ้น</p>
+              
+              <hr class="my-4 border-slate-300" />
+              
+              <p class="font-bold text-black mb-2">นโยบายความเป็นส่วนตัว (PDPA)</p>
+              <p class="mb-4">ข้อมูลส่วนบุคคลที่ท่านให้ไว้จะถูกเก็บรักษาอย่างปลอดภัย และใช้เพื่อวัตถุประสงค์ในการพิจารณาคัดเลือกพนักงานเท่านั้น บริษัทฯ จะไม่เปิดเผยข้อมูลแก่บุคคลภายนอก เว้นแต่ได้รับความยินยอมจากท่าน หรือเป็นไปตามที่กฎหมายกำหนด</p>
+            </div>
+
+            <!-- การยอมรับเงื่อนไข -->
+            <div class="space-y-4 mt-4">
+              <div>
+                <label for="consentText1" class="block font-medium text-slate-700 mb-1">
+                  การยอมรับเงื่อนไข (นโยบายเขตปลอดสารเสพติด) <span class="text-rose-500">*</span>
+                </label>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-slate-500">พิมพ์คำว่า</span>
+                  <code class="bg-amber-100 text-amber-800 px-2 py-1 rounded font-bold">ยอมรับ</code>
+                  <span class="text-sm text-slate-500">เพื่อยืนยัน:</span>
+                </div>
+                <input 
+                  type="text" 
+                  id="consentText1" 
+                  name="Consent1" 
+                  placeholder="พิมพ์ ยอมรับ" 
+                  required
+                  autocomplete="off"
+                  class="mt-2 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+                />
+              </div>
+              
+              <div>
+                <label for="consentText2" class="block font-medium text-slate-700 mb-1">
+                  การยอมรับเงื่อนไข (นโยบาย PDPA) <span class="text-rose-500">*</span>
+                </label>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-slate-500">พิมพ์คำว่า</span>
+                  <code class="bg-amber-100 text-amber-800 px-2 py-1 rounded font-bold">ยอมรับ</code>
+                  <span class="text-sm text-slate-500">เพื่อยืนยัน:</span>
+                </div>
+                <input 
+                  type="text" 
+                  id="consentText2" 
+                  name="Consent2" 
+                  placeholder="พิมพ์ ยอมรับ" 
+                  required
+                  autocomplete="off"
+                  class="mt-2 w-full rounded-xl border border-blue-100 px-4 py-3 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all" 
+                />
+              </div>
+              <p id="consentError" class="mt-1 text-sm text-rose-600 hidden">กรุณาพิมพ์ "ยอมรับ" ในทั้ง 2 ช่อง</p>
+            </div>
+
+            <!-- ยืนยันอีเมล -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-4">
+              <label class="inline-flex items-start cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  id="confirmEmail" 
+                  name="ConfirmEmail" 
+                  required
+                  class="form-checkbox text-blue-600 h-5 w-5 mt-0.5 rounded" 
+                />
+                <span class="ml-3 text-slate-700">
+                  ข้าพเจ้ายืนยันว่าอีเมลที่กรอกข้างต้นเป็นอีเมลที่ถูกต้องและสามารถติดต่อได้
+                </span>
+              </label>
+              <p id="confirmEmailError" class="mt-2 text-sm text-rose-600 hidden">กรุณาทำเครื่องหมายยืนยันอีเมล</p>
+            </div>
+          </fieldset>
+
+          <!-- Submit Button -->
+          <div class="pt-4">
+            <button 
+              id="submitBtn" 
+              type="submit" 
+              class="btn-primary w-full rounded-xl px-6 py-4 text-white font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              ส่งใบสมัครและเริ่มทำแบบทดสอบ
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Page 2: Instructions with Video -->
+    <!-- ============================================================ -->
+    <div id="page-instructions" class="page" data-step="2">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        <header class="mb-6 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" alt="โลโก้บริษัท" class="mx-auto mb-4 w-full max-w-[420px] object-contain" loading="lazy" />
+          <h1 class="text-2xl md:text-3xl font-bold text-blue-700">📹 วิดีโอคำแนะนำการทำแบบทดสอบ</h1>
+          <p class="mt-2 text-slate-600">กรุณาดูวิดีโอให้จบก่อนดำเนินการต่อ</p>
+        </header>
+
+        <!-- Video Container -->
+        <div class="relative aspect-video w-full max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-lg bg-slate-900">
+          <div id="videoPlayer"></div>
+          <div id="videoLoading" class="absolute inset-0 flex items-center justify-center bg-slate-900">
+            <div class="spinner spinner-lg"></div>
+          </div>
+        </div>
+
+        <!-- Video Status -->
+        <div class="mt-4 text-center space-y-2">
+          <p class="text-slate-600">
+            สถานะ: <span id="videoStatus" class="font-semibold">กำลังโหลด...</span>
+          </p>
+          <p class="text-slate-500 text-sm">
+            เวลา: <span id="timeDisplay">0:00</span> / <span id="durationDisplay">0:00</span>
+          </p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-8 flex justify-between items-center">
+          <button data-backpage="page-register" class="nav-btn rounded-xl px-6 py-3 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold flex items-center gap-2 transition-all">
+            <span>←</span> ย้อนกลับ
+          </button>
+          <button id="btn-instruction-next" data-nextpage="page-pi-a" class="nav-btn btn-primary rounded-xl px-6 py-3 text-white font-semibold flex items-center gap-2">
+            ถัดไป <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Page 3: PI Test A -->
+    <!-- ============================================================ -->
+    <div id="page-pi-a" class="page" data-step="3">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        <header class="mb-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" alt="โลโก้บริษัท" class="mx-auto mb-4 w-full max-w-[420px] object-contain" loading="lazy" />
+        </header>
+        
+        <div class="text-center">
+          <h1 class="text-2xl md:text-3xl font-bold text-blue-700">🔹 1. The Predictive Index</h1>
+          <p class="mt-1 text-xl font-semibold text-slate-700">แบบทดสอบชุด A</p>
+          <h2 class="mt-6 text-xl font-semibold text-red-600">หัวข้อ: มุมมองจาก "ผู้อื่นมองว่าคุณเป็นคนแบบไหน"</h2>
+          <p class="mt-4 max-w-2xl mx-auto text-slate-600">
+            กรุณาเลือกลักษณะนิสัยที่ท่านคิดว่าผู้อื่นมองว่าท่านเป็นแบบนั้น โดยสามารถเลือกได้ไม่จำกัดจำนวนข้อ เมื่อทำเสร็จเรียบร้อยแล้ว กรุณากดส่งและไปยังแบบทดสอบชุดถัดไป
+          </p>
+        </div>
+        
+        <div class="mt-10 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/5f04db6d-b251-4b2c-ae65-3b2b84ebe144.png" alt="Click icon" class="h-64 md:h-96 w-auto mx-auto mb-6" loading="lazy" />
+          <button id="startPiTestA" class="btn-success rounded-xl px-8 py-4 text-white font-semibold text-lg shadow-lg">
+            คลิกทำแบบทดสอบ
+          </button>
+        </div>
+        
+        <div class="mt-12 flex justify-between items-center">
+          <button data-backpage="page-instructions" class="nav-btn rounded-xl px-6 py-3 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold flex items-center gap-2 transition-all">
+            <span>←</span> ย้อนกลับ
+          </button>
+          <button id="pi-a-next" data-nextpage="page-pi-b" class="nav-btn btn-primary rounded-xl px-6 py-3 text-white font-semibold flex items-center gap-2">
+            ถัดไป <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Page 4: PI Test B -->
+    <!-- ============================================================ -->
+    <div id="page-pi-b" class="page" data-step="4">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        <header class="mb-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" alt="โลโก้บริษัท" class="mx-auto mb-4 w-full max-w-[420px] object-contain" loading="lazy" />
+        </header>
+        
+        <div class="text-center">
+          <h1 class="text-2xl md:text-3xl font-bold text-blue-700">🔹 2. The Predictive Index</h1>
+          <p class="mt-1 text-xl font-semibold text-slate-700">แบบทดสอบชุด B</p>
+          <h2 class="mt-6 text-xl font-semibold text-red-600">หัวข้อ: มุมมองจาก "ตัวคุณมองว่าคุณเป็นคนแบบไหน"</h2>
+          <p class="mt-4 max-w-2xl mx-auto text-slate-600">
+            กรุณาเลือกลักษณะนิสัยที่ท่านคิดว่าท่านเป็น โดยสามารถเลือกได้ไม่จำกัดจำนวนข้อ เมื่อทำเสร็จเรียบร้อยแล้ว กรุณากดส่งและไปยังแบบทดสอบชุดถัดไป
+          </p>
+        </div>
+        
+        <div class="mt-10 text-center">
+          <img src="https://img2.pic.in.th/pic/ChatGPT-Image-16-..-2568-11_32_11.png" alt="Click icon" class="h-64 md:h-96 w-auto mx-auto mb-6" loading="lazy" />
+          <button id="startPiTestB" class="btn-success rounded-xl px-8 py-4 text-white font-semibold text-lg shadow-lg">
+            คลิกเพื่อทำแบบทดสอบชุด B
+          </button>
+        </div>
+        
+        <div class="mt-12 flex justify-between items-center">
+          <button data-backpage="page-pi-a" class="nav-btn rounded-xl px-6 py-3 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold flex items-center gap-2 transition-all">
+            <span>←</span> ย้อนกลับ
+          </button>
+          <button id="pi-b-next" data-nextpage="page-logical-intro" class="nav-btn btn-primary rounded-xl px-6 py-3 text-white font-semibold flex items-center gap-2">
+            ถัดไป <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Page 5: Logical Reasoning Set 1 -->
+    <!-- ============================================================ -->
+    <div id="page-logical-intro" class="page" data-step="5">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        <header class="mb-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" alt="โลโก้บริษัท" class="mx-auto mb-4 w-full max-w-[420px] object-contain" loading="lazy" />
+        </header>
+        
+        <div class="text-center">
+          <h1 class="text-2xl md:text-3xl font-bold text-blue-700">🧠 แบบทดสอบตรรกะ (Logical Reasoning)</h1>
+          <div class="mt-4 max-w-2xl mx-auto text-slate-600 space-y-2">
+            <p>ส่วนนี้เป็นแบบทดสอบเพื่อวัดความสามารถด้านการใช้เหตุผล</p>
+            <p>มีทั้งหมด 3 ชุด (50 ข้อ/ชุด) โดยแต่ละชุดมีเวลาจำกัด <strong class="text-red-600">12 นาทีเท่านั้น</strong></p>
+          </div>
+          
+          <div class="mt-6 max-w-2xl mx-auto border-2 border-blue-500 rounded-2xl p-4 bg-blue-50/50">
+            <p class="text-xl font-semibold text-blue-800">🔑 ทุกชุดจะมีให้ใส่รหัสผ่าน</p>
+            <p class="mt-2 text-lg text-slate-700">
+              สามารถขอรหัสได้ที่ LINE OFFICIAL 
+              <a href="https://lin.ee/xYHJZkc" target="_blank" rel="noopener" class="text-blue-600 font-bold hover:underline">คลิกที่นี่</a>
+            </p>
+            <p class="mt-1 text-sm text-slate-600">(โดยเลือกที่ "ปุ่มเมนู" และ "ขอรหัส")</p>
+          </div>
+          
+          <p class="mt-6 text-xl md:text-2xl font-bold text-slate-800">นี่คือแบบทดสอบชุดที่ 1 จาก 3</p>
+        </div>
+        
+        <div class="mt-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-16-121252.png" alt="Logical Reasoning" class="max-w-xs md:max-w-sm mx-auto rounded-lg" loading="lazy" />
+        </div>
+        
+        <div class="mt-8 text-center">
+          <button id="startTestBtn1" class="btn-success rounded-xl px-8 py-4 text-white font-semibold text-lg shadow-lg">
+            เริ่มทำแบบทดสอบชุดที่ 1
+          </button>
+        </div>
+        
+        <div class="mt-12 flex justify-between items-center">
+          <button data-backpage="page-pi-b" class="nav-btn rounded-xl px-6 py-3 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold flex items-center gap-2 transition-all">
+            <span>←</span> ย้อนกลับ
+          </button>
+          <button id="logical-intro-next" data-nextpage="page-logical-set2" class="nav-btn btn-primary rounded-xl px-6 py-3 text-white font-semibold flex items-center gap-2">
+            ถัดไป <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Page 6: Logical Reasoning Set 2 -->
+    <!-- ============================================================ -->
+    <div id="page-logical-set2" class="page" data-step="6">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        <header class="mb-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" alt="โลโก้บริษัท" class="mx-auto mb-4 w-full max-w-[420px] object-contain" loading="lazy" />
+        </header>
+        
+        <div class="text-center">
+          <h1 class="text-2xl md:text-3xl font-bold text-blue-700">🧠 แบบทดสอบตรรกะ ชุดที่ 2</h1>
+          <p class="mt-1 text-xl font-semibold text-slate-700">Logical Reasoning - Set 2</p>
+          <p class="mt-6 text-xl md:text-2xl font-bold text-slate-800">เหลืออีก 2 ชุดสุดท้าย!</p>
+        </div>
+        
+        <div class="mt-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-16-122427.png" alt="Logical Reasoning" class="max-w-xs md:max-w-sm mx-auto rounded-lg" loading="lazy" />
+        </div>
+        
+        <div class="mt-8 text-center">
+          <button id="startTestBtn2" class="btn-success rounded-xl px-8 py-4 text-white font-semibold text-lg shadow-lg">
+            เริ่มทำแบบทดสอบชุดที่ 2
+          </button>
+        </div>
+        
+        <div class="mt-12 flex justify-between items-center">
+          <button data-backpage="page-logical-intro" class="nav-btn rounded-xl px-6 py-3 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold flex items-center gap-2 transition-all">
+            <span>←</span> ย้อนกลับ
+          </button>
+          <button id="logical-set2-next" data-nextpage="page-logical-set3" class="nav-btn btn-primary rounded-xl px-6 py-3 text-white font-semibold flex items-center gap-2">
+            ถัดไป <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Page 7: Logical Reasoning Set 3 -->
+    <!-- ============================================================ -->
+    <div id="page-logical-set3" class="page" data-step="7">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        <header class="mb-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" alt="โลโก้บริษัท" class="mx-auto mb-4 w-full max-w-[420px] object-contain" loading="lazy" />
+        </header>
+        
+        <div class="text-center">
+          <h1 class="text-2xl md:text-3xl font-bold text-blue-700">🧠 แบบทดสอบตรรกะ ชุดที่ 3</h1>
+          <p class="mt-1 text-xl font-semibold text-slate-700">Logical Reasoning - Set 3</p>
+          <p class="mt-6 text-xl md:text-2xl font-bold text-emerald-600">🎉 นี่คือแบบทดสอบตรรกะชุดสุดท้าย!</p>
+        </div>
+        
+        <div class="mt-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-16-122427.png" alt="Logical Reasoning" class="max-w-xs md:max-w-sm mx-auto rounded-lg" loading="lazy" />
+        </div>
+        
+        <div class="mt-8 text-center">
+          <button id="startTestBtn3" class="btn-success rounded-xl px-8 py-4 text-white font-semibold text-lg shadow-lg">
+            เริ่มทำแบบทดสอบชุดที่ 3
+          </button>
+        </div>
+        
+        <div class="mt-12 flex justify-between items-center">
+          <button data-backpage="page-logical-set2" class="nav-btn rounded-xl px-6 py-3 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold flex items-center gap-2 transition-all">
+            <span>←</span> ย้อนกลับ
+          </button>
+          <button id="logical-set3-next" data-nextpage="page-english-intro" class="nav-btn btn-primary rounded-xl px-6 py-3 text-white font-semibold flex items-center gap-2">
+            ถัดไป <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Page 8: English Test -->
+    <!-- ============================================================ -->
+    <div id="page-english-intro" class="page" data-step="8">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        <header class="mb-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" alt="โลโก้บริษัท" class="mx-auto mb-4 w-full max-w-[420px] object-contain" loading="lazy" />
+        </header>
+        
+        <div class="text-center">
+          <h1 class="text-2xl md:text-3xl font-bold text-blue-700">📚 แบบทดสอบภาษาอังกฤษ</h1>
+          <p class="mt-1 text-xl font-semibold text-slate-700">English Testing</p>
+          <p class="mt-6 text-lg text-slate-800">จำนวน 28 ข้อ กำหนดเวลา <strong class="text-red-600">25 นาที</strong></p>
+          <p class="mt-2 text-emerald-600 font-semibold">🏁 นี่คือแบบทดสอบชุดสุดท้าย!</p>
+        </div>
+        
+        <div class="mt-10 text-center">
+          <a 
+            id="english-link" 
+            href="https://www.classmarker.com/online-test/start/access-code/?quiz=pgn686b47061a703" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="inline-block btn-success rounded-xl px-8 py-4 text-white font-semibold text-lg shadow-lg"
+          >
+            🔗 คลิกเพื่อทำแบบทดสอบภาษาอังกฤษ
+          </a>
+        </div>
+        
+        <div class="mt-12 flex justify-between items-center">
+          <button data-backpage="page-logical-set3" class="nav-btn rounded-xl px-6 py-3 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold flex items-center gap-2 transition-all">
+            <span>←</span> ย้อนกลับ
+          </button>
+          <button id="finish-test-btn" class="btn-primary rounded-xl px-6 py-3 text-white font-semibold flex items-center gap-2">
+            ✅ ทำแบบทดสอบเสร็จสิ้น
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Page 9: Completion -->
+    <!-- ============================================================ -->
+    <div id="page-complete" class="page" data-step="9">
+      <div class="mt-6 bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/60 rounded-3xl p-4 md:p-8">
+        <header class="mb-8 text-center">
+          <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2025-08-05-100939.png" alt="โลโก้บริษัท" class="mx-auto mb-4 w-full max-w-[420px] object-contain" loading="lazy" />
+        </header>
+        
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-24 h-24 bg-emerald-100 rounded-full mb-6 animate-bounce">
+            <svg class="w-12 h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h1 class="text-2xl md:text-4xl font-bold text-emerald-600">🎉 ทำแบบทดสอบเสร็จสิ้น!</h1>
+          <p class="mt-2 text-slate-600">ขอบคุณที่สมัครงานกับเรา</p>
+          
+          <!-- Summary Card -->
+          <div class="mt-8 text-left max-w-md mx-auto bg-slate-50 border border-slate-200 rounded-xl p-6 space-y-3">
+            <h3 class="font-bold text-slate-800 text-lg mb-4 text-center">📋 สรุปข้อมูลการสมัคร</h3>
+            <p><span class="font-medium text-slate-600">ชื่อ-นามสกุล:</span> <span id="display-fullname" class="text-slate-800"></span></p>
+            <p><span class="font-medium text-slate-600">อีเมล:</span> <span id="display-email" class="text-slate-800"></span></p>
+            <p><span class="font-medium text-slate-600">ตำแหน่งที่สมัคร:</span> <span id="display-position" class="text-slate-800"></span></p>
+            <p><span class="font-medium text-slate-600">IP Address:</span> <span id="display-ip" class="text-slate-800"></span></p>
+            <p><span class="font-medium text-slate-600">เวลาที่เสร็จสิ้น:</span> <span id="display-timestamp" class="text-slate-800"></span></p>
+          </div>
+          
+          <!-- Important Notice -->
+          <div class="mt-8 max-w-lg mx-auto border-2 border-rose-500 rounded-2xl p-6 bg-rose-50/50">
+            <p class="text-xl font-bold text-rose-800">⚠️ สำคัญมาก!</p>
+            <p class="mt-3 text-base text-slate-700">กรุณาแคปหน้าจอนี้ เพื่อส่งยืนยันใน LINE OFFICIAL</p>
+            <p class="mt-2 text-sm text-slate-600">หากไม่แคปหน้าจอนี้ เราจะถือว่าคุณยังทำแบบทดสอบไม่เสร็จสิ้น และจะไม่ทำการตรวจข้อสอบแต่อย่างใด</p>
+            <a 
+              href="https://lin.ee/xYHJZkc" 
+              target="_blank" 
+              rel="noopener" 
+              class="inline-block mt-4 btn-success rounded-xl px-6 py-3 text-white font-semibold"
+            >
+              💬 ส่งหลักฐานทาง LINE
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- Modals -->
+  <!-- ============================================================ -->
+  
+  <!-- PI Instruction Modal -->
+  <div id="piInstructionModal" class="fixed inset-0 bg-black/60 hidden grid place-items-center z-50 p-4 modal-backdrop">
+    <div class="modal-content bg-white rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl">
+      <h2 class="text-2xl font-bold text-blue-700 text-center">📋 คำแนะนำ</h2>
+      <p id="piInstructionText" class="mt-4 text-center text-slate-700 text-lg"></p>
+      <div class="mt-6">
+        <button id="confirmPiModalBtn" class="w-full btn-primary rounded-lg px-5 py-3 text-white font-semibold text-lg">
+          รับทราบและเริ่มทำแบบทดสอบ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning Modal -->
+  <div id="warningModal" class="fixed inset-0 bg-black/60 hidden grid place-items-center z-50 p-4 modal-backdrop">
+    <div class="modal-content bg-white rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl">
+      <h2 class="text-3xl font-extrabold text-rose-600 text-center">⚠️ สำคัญมากๆ</h2>
+      <ul class="list-disc list-inside mt-6 space-y-4 text-slate-700 text-lg">
+        <li>พยายามตอบให้ถูกต้องและมากที่สุดภายในเวลาที่กำหนด</li>
+        <li>สามารถข้ามข้อได้ ไม่จำเป็นต้องทำทุกข้อ</li>
+        <li>ระบบจะตรวจจับการทำแบบทดสอบแบบ <strong>Full Screen เท่านั้น</strong></li>
+        <li>หากออกจากหน้าเว็บเกิน 2 ครั้ง ระบบจะถือว่า <strong class="text-red-600">"โมฆะ"</strong></li>
+      </ul>
+      <div class="mt-8 flex flex-col sm:flex-row-reverse gap-3">
+        <button id="confirmModalBtn" class="w-full btn-primary rounded-lg px-5 py-3 text-white font-semibold text-lg">
+          รับทราบและเริ่มทำแบบทดสอบ
+        </button>
+        <button id="cancelModalBtn" class="w-full rounded-lg px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-lg transition-colors">
+          ยกเลิก
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completion Confirmation Modal -->
+  <div id="completionModal" class="fixed inset-0 bg-black/60 hidden grid place-items-center z-50 p-4 modal-backdrop">
+    <div class="modal-content bg-white rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl">
+      <h2 class="text-2xl font-bold text-blue-700 text-center">✅ ยืนยันการส่งแบบทดสอบ</h2>
+      <p class="mt-4 text-center text-slate-600">กรุณายืนยันว่าคุณได้ทำแบบทดสอบครบทุกชุดแล้ว</p>
+      
+      <div id="completionChecklist" class="mt-6 space-y-3">
+        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+          <input type="checkbox" class="h-5 w-5 rounded accent-emerald-600" />
+          <span>PI Test A - ผู้อื่นมองคุณอย่างไร</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+          <input type="checkbox" class="h-5 w-5 rounded accent-emerald-600" />
+          <span>PI Test B - คุณมองตัวเองอย่างไร</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+          <input type="checkbox" class="h-5 w-5 rounded accent-emerald-600" />
+          <span>Logical Reasoning ชุดที่ 1</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+          <input type="checkbox" class="h-5 w-5 rounded accent-emerald-600" />
+          <span>Logical Reasoning ชุดที่ 2</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+          <input type="checkbox" class="h-5 w-5 rounded accent-emerald-600" />
+          <span>Logical Reasoning ชุดที่ 3</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+          <input type="checkbox" class="h-5 w-5 rounded accent-emerald-600" />
+          <span>English Test</span>
+        </label>
+      </div>
+      
+      <div class="mt-8 flex flex-col sm:flex-row-reverse gap-3">
+        <button id="confirmCompletionBtn" class="w-full btn-success rounded-lg px-5 py-3 text-white font-semibold text-lg">
+          ยืนยันและดูผลสรุป
+        </button>
+        <button id="cancelCompletionBtn" class="w-full rounded-lg px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-lg transition-colors">
+          กลับไปแก้ไข
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- YouTube IFrame API -->
+  <!-- ============================================================ -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  
+  <script>
+    // ============================================================
+    // CONFIGURATION
+    // ============================================================
+    const CONFIG = {
+      SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwbD7ooCm2mA5gdR9YLYJg0RNMU9YCJehG58mLoFxPvIqfrEeb-088LCDuALAJSHUPG/exec',
+      YOUTUBE_VIDEO_ID: 'jPi1OpKzo64', // เปลี่ยนเป็น video ID ที่ต้องการ
+      MAX_RETRY_ATTEMPTS: 3,
+      RETRY_DELAY_MS: 2000,
+      STORAGE_KEY: 'lcmt_application_data',
+      PROGRESS_KEY: 'lcmt_application_progress'
+    };
+
+    // ============================================================
+    // APPLICATION STATE
+    // ============================================================
+    const AppState = {
+      userData: {},
+      currentPage: 'page-register',
+      isSubmitting: false,
+      completedTests: new Set(),
+      retryCount: 0
+    };
+
+    // ============================================================
+    // UTILITY FUNCTIONS
+    // ============================================================
+    
+    // Toast Notification System
+    function showToast(message, type = 'success', duration = 4000) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+      
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${message}</span>`;
+      container.appendChild(toast);
+      
+      // Trigger animation
+      requestAnimationFrame(() => toast.classList.add('show'));
+      
+      // Auto remove
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    // Format time for video
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    // Update progress bar
+    function updateProgressBar(step, totalSteps = 9) {
+      const percentage = (step / totalSteps) * 100;
+      document.getElementById('progressBar').style.width = `${percentage}%`;
+      
+      // Update step dots
+      const dots = document.querySelectorAll('.step-dot');
+      dots.forEach((dot, index) => {
+        dot.classList.remove('active', 'completed');
+        if (index < step - 1) {
+          dot.classList.add('completed');
+        } else if (index === step - 1) {
+          dot.classList.add('active');
+        }
+      });
+    }
+
+    // Save progress to localStorage
+    function saveProgress() {
+      try {
+        const data = {
+          userData: AppState.userData,
+          currentPage: AppState.currentPage,
+          completedTests: Array.from(AppState.completedTests),
+          timestamp: Date.now()
+        };
+        localStorage.setItem(CONFIG.PROGRESS_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Could not save progress:', e);
+      }
+    }
+
+    // Load progress from localStorage
+    function loadProgress() {
+      try {
+        const saved = localStorage.getItem(CONFIG.PROGRESS_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
+          // Only restore if within 24 hours
+          if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) {
+            return data;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load progress:', e);
+      }
+      return null;
+    }
+
+    // Clear saved progress
+    function clearProgress() {
+      try {
+        localStorage.removeItem(CONFIG.PROGRESS_KEY);
+      } catch (e) {
+        console.warn('Could not clear progress:', e);
+      }
+    }
+
+    // ============================================================
+    // PAGE NAVIGATION
+    // ============================================================
+    function showPage(pageId) {
+      const pages = document.querySelectorAll('.page');
+      pages.forEach(page => page.classList.remove('active'));
+      
+      const newPage = document.getElementById(pageId);
+      if (newPage) {
+        newPage.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Get step number
+        const step = parseInt(newPage.dataset.step) || 1;
+        updateProgressBar(step);
+        
+        AppState.currentPage = pageId;
+        saveProgress();
+        
+        // Handle completion page
+        if (pageId === 'page-complete') {
+          populateCompletionPage();
+          clearProgress();
+        }
+      }
+    }
+
+    function populateCompletionPage() {
+      const u = AppState.userData;
+      document.getElementById('display-fullname').textContent = 
+        `${u.firstNameTH || ''} ${u.lastNameTH || ''} (${u.firstName || ''} ${u.lastName || ''})`;
+      document.getElementById('display-email').textContent = u.email || '';
+      document.getElementById('display-position').textContent = u.position || '';
+      document.getElementById('display-ip').textContent = u.ip || 'ไม่สามารถบันทึกได้';
+      document.getElementById('display-timestamp').textContent = new Date().toLocaleString('th-TH');
+    }
+
+    // ============================================================
+    // FORM VALIDATION
+    // ============================================================
+    const ValidationRules = {
+      firstNameTH: {
+        pattern: /^[\u0E00-\u0E7F\s]+$/,
+        message: 'กรุณากรอกชื่อภาษาไทยเท่านั้น'
+      },
+      lastNameTH: {
+        pattern: /^[\u0E00-\u0E7F\s]+$/,
+        message: 'กรุณากรอกนามสกุลภาษาไทยเท่านั้น'
+      },
+      firstName: {
+        pattern: /^[A-Za-z]+(?:[\s\-'][A-Za-z]+)*$/,
+        message: 'กรุณากรอกเป็นตัวอักษรภาษาอังกฤษเท่านั้น'
+      },
+      lastName: {
+        pattern: /^[A-Za-z]+(?:[\s\-'][A-Za-z]+)*$/,
+        message: 'กรุณากรอกเป็นตัวอักษรภาษาอังกฤษเท่านั้น'
+      },
+      email: {
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        message: 'กรุณากรอกอีเมลที่ถูกต้อง'
+      },
+      phone: {
+        pattern: /^0[0-9]{8,9}$/,
+        message: 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'
+      },
+      position: {
+        minLength: 2,
+        message: 'กรุณาระบุตำแหน่ง'
+      }
+    };
+
+    function validateField(input) {
+      const errorEl = document.getElementById(input.id + 'Error');
+      const rule = ValidationRules[input.id];
+      let isValid = true;
+      let value = input.value.trim();
+
+      if (!value) {
+        isValid = false;
+      } else if (rule) {
+        if (rule.pattern && !rule.pattern.test(value)) {
+          isValid = false;
+        }
+        if (rule.minLength && value.length < rule.minLength) {
+          isValid = false;
+        }
+        if (rule.min !== undefined && rule.max !== undefined) {
+          const num = parseInt(value);
+          if (isNaN(num) || num < rule.min || num > rule.max) {
+            isValid = false;
+          }
+        }
+      }
+
+      if (errorEl) {
+        errorEl.classList.toggle('hidden', isValid);
+      }
+      return isValid;
+    }
+
+    function validateForm() {
+      let isValid = true;
+      const errors = [];
+
+      // Validate text fields
+      const basicFields = ['firstNameTH', 'lastNameTH', 'firstName', 'lastName', 'email', 'phone', 'position'];
+      basicFields.forEach(id => {
+        const input = document.getElementById(id);
+        if (input && !validateField(input)) {
+          isValid = false;
+          errors.push(id);
+        }
+      });
+
+      // Validate Military Status
+      const militaryStatus = document.querySelector('input[name="MilitaryStatus"]:checked');
+      const militaryOtherText = document.getElementById('militaryOtherText');
+      const militaryError = document.getElementById('militaryError');
+      
+      if (!militaryStatus) {
+        isValid = false;
+        militaryError?.classList.remove('hidden');
+      } else if (militaryStatus.value === 'Other' && !militaryOtherText.value.trim()) {
+        isValid = false;
+        militaryError?.classList.remove('hidden');
+      } else {
+        militaryError?.classList.add('hidden');
+      }
+
+      // Validate Education Level
+      const eduLevel = document.getElementById('educationLevel');
+      const eduError = document.getElementById('educationError');
+      if (!eduLevel.value) {
+        isValid = false;
+        eduError?.classList.remove('hidden');
+      } else {
+        eduError?.classList.add('hidden');
+      }
+
+      // Validate Drug History
+      const drugHistory = document.querySelector('input[name="DrugHistory"]:checked');
+      const drugError = document.getElementById('drugError');
+      if (!drugHistory) {
+        isValid = false;
+        drugError?.classList.remove('hidden');
+      } else {
+        drugError?.classList.add('hidden');
+      }
+
+      // Validate Consent
+      const consent1 = document.getElementById('consentText1');
+      const consent2 = document.getElementById('consentText2');
+      const consentError = document.getElementById('consentError');
+      if (!consent1.value.includes('ยอมรับ') || !consent2.value.includes('ยอมรับ')) {
+        isValid = false;
+        consentError?.classList.remove('hidden');
+      } else {
+        consentError?.classList.add('hidden');
+      }
+
+      // Validate Email Confirmation
+      const confirmEmail = document.getElementById('confirmEmail');
+      const confirmEmailError = document.getElementById('confirmEmailError');
+      if (!confirmEmail.checked) {
+        isValid = false;
+        confirmEmailError?.classList.remove('hidden');
+      } else {
+        confirmEmailError?.classList.add('hidden');
+      }
+
+      return { isValid, errors };
+    }
+
+    // ============================================================
+    // FORM SUBMISSION WITH RETRY
+    // ============================================================
+    async function submitForm(retryCount = 0) {
+      const submitBtn = document.getElementById('submitBtn');
+      const militaryStatus = document.querySelector('input[name="MilitaryStatus"]:checked');
+      const militaryOtherText = document.getElementById('militaryOtherText');
+      const drugHistory = document.querySelector('input[name="DrugHistory"]:checked');
+      const eduLevel = document.getElementById('educationLevel');
+
+      // Collect user data
+      AppState.userData = {
+        firstNameTH: document.getElementById('firstNameTH').value.trim(),
+        lastNameTH: document.getElementById('lastNameTH').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.replace(/[-\s]/g, ''),
+        position: document.getElementById('position').value.trim(),
+        military: militaryStatus.value === 'Other' ? militaryOtherText.value.trim() : militaryStatus.value,
+        eduLevel: eduLevel.value,
+        drugHistory: drugHistory.value,
+        consent1: document.getElementById('consentText1').value.trim(),
+        consent2: document.getElementById('consentText2').value.trim()
+      };
+
+      // Fetch IP Address
+      try {
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        AppState.userData.ip = ipData.ip;
+      } catch (e) {
+        console.warn('Could not fetch IP:', e);
+        AppState.userData.ip = 'N/A';
+      }
+
+      // Prepare FormData
+      const formData = new FormData();
+      formData.append('FirstNameTH', AppState.userData.firstNameTH);
+      formData.append('LastNameTH', AppState.userData.lastNameTH);
+      formData.append('FirstName', AppState.userData.firstName);
+      formData.append('LastName', AppState.userData.lastName);
+      formData.append('Email', AppState.userData.email);
+      formData.append('Phone', AppState.userData.phone);
+      formData.append('Position', AppState.userData.position);
+      formData.append('MilitaryStatus', AppState.userData.military);
+      formData.append('EducationLevel', AppState.userData.eduLevel);
+      formData.append('DrugHistory', AppState.userData.drugHistory);
+      formData.append('Consent1', AppState.userData.consent1);
+      formData.append('Consent2', AppState.userData.consent2);
+      formData.append('IPAddress', AppState.userData.ip);
+
+      try {
+        const response = await fetch(CONFIG.SCRIPT_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.result === 'success') {
+          console.log('Data saved successfully, row:', result.row);
+          showToast('บันทึกข้อมูลสำเร็จ!', 'success');
+          saveProgress();
+          showPage('page-instructions');
+          return true;
+        } else {
+          throw new Error(result.error || 'Unknown error');
+        }
+
+      } catch (error) {
+        console.error('Submission error:', error);
+
+        if (retryCount < CONFIG.MAX_RETRY_ATTEMPTS) {
+          showToast(`กำลังลองใหม่... (${retryCount + 1}/${CONFIG.MAX_RETRY_ATTEMPTS})`, 'warning');
+          await new Promise(r => setTimeout(r, CONFIG.RETRY_DELAY_MS));
+          return submitForm(retryCount + 1);
+        } else {
+          showToast('เกิดข้อผิดพลาด แต่ระบบจะพาคุณไปหน้าถัดไป', 'warning');
+          saveProgress();
+          setTimeout(() => showPage('page-instructions'), 1500);
+          return false;
+        }
+      }
+    }
+
+    // ============================================================
+    // YOUTUBE PLAYER
+    // ============================================================
+    let player;
+    let videoInterval;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('videoPlayer', {
+        height: '100%',
+        width: '100%',
+        videoId: CONFIG.YOUTUBE_VIDEO_ID,
+        playerVars: {
+          'playsinline': 1,
+          'rel': 0,
+          'modestbranding': 1,
+          'controls': 1
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      document.getElementById('videoLoading').style.display = 'none';
+      document.getElementById('videoStatus').textContent = 'พร้อมเล่น';
+      document.getElementById('durationDisplay').textContent = formatTime(player.getDuration());
+    }
+
+    function onPlayerStateChange(event) {
+      const statusEl = document.getElementById('videoStatus');
+      
+      if (event.data === YT.PlayerState.PLAYING) {
+        statusEl.textContent = 'กำลังเล่น';
+        statusEl.className = 'font-semibold text-green-600';
+        
+        if (videoInterval) clearInterval(videoInterval);
+        videoInterval = setInterval(checkVideoTime, 1000);
+        
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        statusEl.textContent = 'หยุดชั่วคราว';
+        statusEl.className = 'font-semibold text-amber-600';
+        
+      } else if (event.data === YT.PlayerState.ENDED) {
+        statusEl.textContent = 'วิดีโอจบแล้ว ✓';
+        statusEl.className = 'font-semibold text-emerald-600';
+        enableVideoCheckbox();
+      }
+    }
+
+    function onPlayerError(event) {
+      console.error('YouTube Player Error:', event.data);
+      document.getElementById('videoLoading').innerHTML = 
+        '<p class="text-white">ไม่สามารถโหลดวิดีโอได้ กรุณารีเฟรชหน้าเว็บ</p>';
+      document.getElementById('videoStatus').textContent = 'เกิดข้อผิดพลาด';
+      
+      // Allow bypass on error
+      enableVideoCheckbox();
+    }
+
+    function checkVideoTime() {
+      if (!player || !player.getCurrentTime) return;
+
+      const currentTime = player.getCurrentTime();
+      const duration = player.getDuration();
+
+      document.getElementById('timeDisplay').textContent = formatTime(currentTime);
+      document.getElementById('durationDisplay').textContent = formatTime(duration);
+
+      // Enable checkbox when video is almost complete (within 3 seconds)
+      if (duration > 0 && (duration - currentTime) <= 3) {
+        clearInterval(videoInterval);
+        enableVideoCheckbox();
+      }
+    }
+
+    function enableVideoCheckbox() {
+      const checkbox = document.getElementById('videoWatchedCheckbox');
+      if (checkbox) {
+        checkbox.disabled = false;
+        checkbox.classList.remove('cursor-not-allowed', 'opacity-50');
+        checkbox.classList.add('cursor-pointer');
+      }
+    }
+
+    // ============================================================
+    // TEST BUTTONS AND MODALS
+    // ============================================================
+    const piTestConfig = {
+      startPiTestA: {
+        url: 'https://docs.google.com/forms/d/e/1FAIpQLSf1bMAy5RZ1dGTQGeoaAvA-B0LJ4Z4xaxM8vdwkBZqwIGowZA/viewform',
+        next: 'pi-a-next',
+        instruction: 'คุณสามารถเลือกได้ไม่จำกัดจำนวนข้อ หากคุณคิดว่า ผู้อื่นมองว่าคุณเป็นคนแบบนั้น'
+      },
+      startPiTestB: {
+        url: 'https://docs.google.com/forms/d/e/1FAIpQLSf9UMwFSVatVey0ivACu3wk4kPyvI3VL2NQXNUn2_zZA7noSg/viewform',
+        next: 'pi-b-next',
+        instruction: 'คุณสามารถเลือกได้ไม่จำกัดจำนวนข้อ หากคุณคิดว่า คุณมองว่าคุณเป็นคนแบบที่คุณคิดว่าเป็นคุณเอง'
+      }
+    };
+
+    const logicalTestConfig = {
+      startTestBtn1: { 
+        url: 'https://www.classmarker.com/online-test/start/access-code/?quiz=r4e686b42fada169', 
+        next: 'logical-intro-next' 
+      },
+      startTestBtn2: { 
+        url: 'https://www.classmarker.com/online-test/start/access-code/?quiz=99b686b44e854477', 
+        next: 'logical-set2-next' 
+      },
+      startTestBtn3: { 
+        url: 'https://www.classmarker.com/online-test/start/access-code/?quiz=tmg686b45fb6b665', 
+        next: 'logical-set3-next' 
+      }
+    };
+
+    // ============================================================
+    // MAIN INITIALIZATION
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check for saved progress
+      const savedProgress = loadProgress();
+      if (savedProgress && savedProgress.currentPage !== 'page-register') {
+        if (confirm('พบข้อมูลการสมัครที่ยังไม่เสร็จสิ้น ต้องการดำเนินการต่อหรือไม่?')) {
+          AppState.userData = savedProgress.userData || {};
+          AppState.completedTests = new Set(savedProgress.completedTests || []);
+          showPage(savedProgress.currentPage);
+        } else {
+          clearProgress();
+        }
+      }
+
+      // Network status monitoring
+      window.addEventListener('online', () => {
+        document.getElementById('offlineIndicator').classList.remove('show');
+        showToast('กลับมาออนไลน์แล้ว', 'success');
+      });
+
+      window.addEventListener('offline', () => {
+        document.getElementById('offlineIndicator').classList.add('show');
+        showToast('ไม่มีการเชื่อมต่ออินเทอร์เน็ต', 'error');
+      });
+
+      // Navigation buttons
+      document.querySelectorAll('.nav-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          const targetPageId = button.dataset.nextpage || button.dataset.backpage;
+          if (targetPageId) showPage(targetPageId);
+        });
+      });
+
+      // Military radio logic
+      const militaryRadios = document.querySelectorAll('input[name="MilitaryStatus"]');
+      const militaryOtherText = document.getElementById('militaryOtherText');
+      
+      militaryRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.value === 'Other') {
+            militaryOtherText.disabled = false;
+            militaryOtherText.focus();
+          } else {
+            militaryOtherText.disabled = true;
+            militaryOtherText.value = '';
+          }
+        });
+      });
+
+      // Real-time validation
+      Object.keys(ValidationRules).forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+          input.addEventListener('blur', () => validateField(input));
+          input.addEventListener('input', () => {
+            const errorEl = document.getElementById(id + 'Error');
+            if (errorEl && !errorEl.classList.contains('hidden')) {
+              validateField(input);
+            }
+          });
+        }
+      });
+
+      // Form submission
+      const registerForm = document.getElementById('registerForm');
+      registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (AppState.isSubmitting) return;
+        
+        const { isValid, errors } = validateForm();
+        
+        if (isValid) {
+          AppState.isSubmitting = true;
+          const submitBtn = document.getElementById('submitBtn');
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner"></span>กำลังบันทึกข้อมูล...';
+          
+          try {
+            await submitForm();
+          } finally {
+            AppState.isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'ส่งใบสมัครและเริ่มทำแบบทดสอบ';
+          }
+        } else {
+          const firstError = document.querySelector('.text-rose-600:not(.hidden)');
+          if (firstError) {
+            firstError.closest('div')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+        }
+      });
+
+      // Video checkbox
+      const videoCheckbox = document.getElementById('videoWatchedCheckbox');
+      const instructionNextBtn = document.getElementById('btn-instruction-next');
+      
+      if (videoCheckbox && instructionNextBtn) {
+        videoCheckbox.addEventListener('change', () => {
+          instructionNextBtn.disabled = !videoCheckbox.checked;
+        });
+      }
+
+      // PI Test modals
+      const piModal = document.getElementById('piInstructionModal');
+      const piText = document.getElementById('piInstructionText');
+      const confirmPiBtn = document.getElementById('confirmPiModalBtn');
+      let currentPiTest = {};
+
+      Object.entries(piTestConfig).forEach(([btnId, config]) => {
+        const button = document.getElementById(btnId);
+        if (button) {
+          button.addEventListener('click', () => {
+            currentPiTest = config;
+            piText.textContent = config.instruction;
+            piModal.classList.remove('hidden');
+          });
+        }
+      });
+
+      confirmPiBtn.addEventListener('click', () => {
+        if (currentPiTest.url) window.open(currentPiTest.url, '_blank');
+        if (currentPiTest.next) {
+          document.getElementById(currentPiTest.next).disabled = false;
+          AppState.completedTests.add(currentPiTest.next);
+          saveProgress();
+        }
+        piModal.classList.add('hidden');
+      });
+
+      // Logical Test modals
+      const warningModal = document.getElementById('warningModal');
+      const confirmModalBtn = document.getElementById('confirmModalBtn');
+      const cancelModalBtn = document.getElementById('cancelModalBtn');
+      let currentLogicalTest = {};
+
+      Object.entries(logicalTestConfig).forEach(([btnId, config]) => {
+        const button = document.getElementById(btnId);
+        if (button) {
+          button.addEventListener('click', () => {
+            currentLogicalTest = config;
+            warningModal.classList.remove('hidden');
+          });
+        }
+      });
+
+      cancelModalBtn.addEventListener('click', () => warningModal.classList.add('hidden'));
+      
+      confirmModalBtn.addEventListener('click', () => {
+        if (currentLogicalTest.url) window.open(currentLogicalTest.url, '_blank');
+        if (currentLogicalTest.next) {
+          document.getElementById(currentLogicalTest.next).disabled = false;
+          AppState.completedTests.add(currentLogicalTest.next);
+          saveProgress();
+        }
+        warningModal.classList.add('hidden');
+      });
+
+      // English test link
+      const englishLink = document.getElementById('english-link');
+      if (englishLink) {
+        englishLink.addEventListener('click', () => {
+          document.getElementById('finish-test-btn').disabled = false;
+          AppState.completedTests.add('english');
+          saveProgress();
+        });
+      }
+
+      // Completion modal
+      const completionModal = document.getElementById('completionModal');
+      const finishTestBtn = document.getElementById('finish-test-btn');
+      const confirmCompletionBtn = document.getElementById('confirmCompletionBtn');
+      const cancelCompletionBtn = document.getElementById('cancelCompletionBtn');
+      const completionChecklist = document.getElementById('completionChecklist');
+
+      if (finishTestBtn) {
+        finishTestBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          completionModal.classList.remove('hidden');
+        });
+      }
+
+      if (cancelCompletionBtn) {
+        cancelCompletionBtn.addEventListener('click', () => {
+          completionModal.classList.add('hidden');
+        });
+      }
+
+      if (confirmCompletionBtn) {
+        confirmCompletionBtn.addEventListener('click', () => {
+          showPage('page-complete');
+          completionModal.classList.add('hidden');
+        });
+      }
+
+      if (completionChecklist) {
+        completionChecklist.addEventListener('change', () => {
+          const checkboxes = completionChecklist.querySelectorAll('input[type="checkbox"]');
+          const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+          confirmCompletionBtn.disabled = !allChecked;
+        });
+      }
+
+      // Close modals on backdrop click
+      [piModal, warningModal, completionModal].forEach(modal => {
+        if (modal) {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              modal.classList.add('hidden');
+            }
+          });
+        }
+      });
+
+      // Keyboard accessibility - Escape to close modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          [piModal, warningModal, completionModal].forEach(modal => {
+            if (modal && !modal.classList.contains('hidden')) {
+              modal.classList.add('hidden');
+            }
+          });
+        }
+      });
+
+      // Initialize progress bar
+      updateProgressBar(1);
+    });
+  </script>
+</body>
+</html>
